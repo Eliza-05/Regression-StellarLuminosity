@@ -1,0 +1,246 @@
+============================================================
+  AUTOMATIC COPILOT EVALUATION — TA GRADING REPORT
+  Course: Digital Transformation and Enterprise Architecture
+  Topic: Stellar Luminosity — Linear and Polynomial Regression
+============================================================
+
+------------------------------------------------------------
+SUMMARY
+------------------------------------------------------------
+The repository is well-organized and demonstrates a solid understanding of the
+main assignment goals. Both notebooks cover their respective topics thoroughly:
+Part I implements linear regression with cost surface analysis, non-vectorized
+and vectorized gradient descent, multiple learning-rate experiments, convergence
+plots, and conceptual reflection; Part II adds feature engineering, three model
+variants (M1/M2/M3), the mandatory cost-vs-interaction sweep, and an inference
+demo. The README provides detailed SageMaker execution evidence with five
+supporting screenshots and a local-vs-cloud comparison table. The primary
+technical concern is a precedence bug in the MSE formula of Notebook 1
+(`(1/2*n)` evaluates as `n/2` instead of `1/(2n)`), which inflates all cost
+values but does not break the qualitative behavior of gradient descent. A minor
+compliance issue is the import and pip-installation of `pandas` in both
+notebooks, even though the library is not in the allowed list and is not
+meaningfully used in computations.
+
+------------------------------------------------------------
+GRADING BREAKDOWN  (0.0 – 5.0 scale)
+------------------------------------------------------------
+
+1. Repository Structure & Compliance ............. 0.40 / 0.50
+   - README.md present: YES
+   - Two notebooks covering Part I and Part II: YES
+     (01_part1_linreg_1feature.ipynb, 02_part2_polyreg.ipynb)
+   - Datasets defined inside notebooks: YES (numpy arrays in Cell 8 / Cell 7)
+   - Only allowed libraries used: MOSTLY — `pandas` is pip-installed and
+     imported in Notebook 2 (Cell 4 & 5) and pip-installed in Notebook 1
+     (Cell 4). Pandas is not an allowed library per the assignment spec.
+     However, it is not materially used in any computation.
+   Deduction: -0.10 (pandas import/install against library constraints)
+
+2. Notebook 1 — Linear Regression ............... 1.70 / 2.00
+   - Dataset visualization and interpretation: YES — scatter plot with
+     commentary on super-linear (near-exponential) trend. PASS.
+   - Hypothesis and MSE implementation: PARTIAL — `predict()` is correct;
+     `error_mse()` contains an operator-precedence bug:
+       `mse = (1/2*n) * np.sum(error ** 2)`
+     Due to Python left-to-right evaluation this computes `(n/2)*sum(error^2)`
+     instead of `sum(error^2)/(2n)`. Cost values are scaled by n^2 relative to
+     the correct formula. Gradient functions are unaffected (they do not call
+     error_mse), so convergence still works qualitatively, but reported cost
+     values are incorrect numerically.
+   - Cost surface (mandatory): YES — 3D surface + contour plot produced,
+     minimum highlighted, conceptual explanation provided. PASS.
+   - Gradient derivation: YES — analytic formulas derived in markdown,
+     `calcularGradientes()` correctly implements both partial derivatives. PASS.
+   - Non-vectorized gradient descent: YES — separate Python lists, explicit
+     loop over samples. Note: minor typo (`M_list` vs `M_List`) may cause a
+     NameError at runtime, but the intent and structure are correct. PARTIAL.
+   - Vectorized gradient descent: YES — `gradient_descent()` uses NumPy
+     array operations. PASS.
+   - Convergence plot (mandatory): YES — loss vs. iteration curve with final
+     cost annotated and convergence discussion. PASS.
+   - Multiple learning-rate experiments (mandatory, ≥3): YES —
+     α ∈ {0.001, 0.01, 0.5} tested, comparative plot and discussion. PASS.
+   - Final fit plot and error discussion: YES — scatter + regression line,
+     residual pattern identified and linked to model underfitting. PASS.
+   - Conceptual questions (meaning of w, limits of linearity): YES — both
+     answered with astrophysical and mathematical reasoning. PASS.
+   Deductions: -0.30 (MSE precedence bug with operator precedence error that
+   corrupts all reported cost values; minor non-vectorized variable name typo)
+
+3. Notebook 2 — Polynomial Regression ........... 1.85 / 2.00
+   - Visualization with temperature encoding: YES — scatter plot with colormap
+     on T, colorbar, and descriptive commentary. PASS.
+   - Feature engineering [M, T, M^2, M*T]: YES — `construir_matriz()` builds
+     the correct design matrix for all three model variants. PASS.
+   - Vectorized loss and gradients: YES — matrix operations via NumPy
+     (`X @ w`, vectorized gradient). PASS.
+   - Training and convergence plot: YES — loss curves for M1/M2/M3 overlaid
+     or shown sequentially with discussion. PASS.
+   - Feature selection experiment M1/M2/M3 (mandatory): YES — all three
+     models trained, final costs compared, M3 > M2 > M1 result confirmed
+     and explained. PASS.
+   - Interaction cost analysis w_MT sweep (mandatory): YES — cost plotted
+     against w_MT over a symmetric range around the learned value; parabolic
+     shape and sensitivity discussed. PASS.
+   - Inference demo (mandatory): YES — new star (M=1.3, T=6600) predicted
+     at L≈2.54, compared with bracketing training points, scatter plot
+     highlights the predicted point. PASS.
+   Deductions: -0.15 (pandas imported despite not being in allowed libraries;
+     minor: normalization parameters should ideally be derived from training
+     data only and reused for inference, which is done correctly here, but
+     the variable naming could be clearer)
+
+4. Cloud Execution Evidence (SageMaker) .......... 0.50 / 0.50
+   - Description of SageMaker execution: YES — step-by-step deployment
+     procedure documented in README. PASS.
+   - Screenshots of notebooks in SageMaker: YES — imagen2.png shows both
+     notebooks loaded in Code Editor. PASS.
+   - Screenshot of successful execution: YES — imagen3.png shows executed
+     cells with numerical outputs. PASS.
+   - At least one plot visible: YES — imagen4.png (convergence / cost surface),
+     imagen5.png (predictions), imagen1.png (3D cost surface). PASS.
+   - Local vs cloud comparison: YES — comparison table with 5 aspects
+     evaluated and observations written. PASS.
+   No deductions.
+
+------------------------------------------------------------
+FINAL GRADE
+------------------------------------------------------------
+  Repository structure & compliance:  0.40 / 0.50
+  Notebook 1 – Linear regression:     1.70 / 2.00
+  Notebook 2 – Polynomial regression: 1.85 / 2.00
+  Cloud execution evidence:           0.50 / 0.50
+  -----------------------------------------------
+  Total:                              4.45 / 5.00
+
+  Final grade: 4.45 / 5.0  →  PASS  (minimum: 3.0 / 5.0)
+
+------------------------------------------------------------
+STRENGTHS
+------------------------------------------------------------
+- Complete coverage of all mandatory items: cost surface, convergence plot,
+  learning-rate comparison, M1/M2/M3 feature selection, cost-vs-w_MT sweep,
+  and inference demo.
+- Both non-vectorized and vectorized implementations are present and clearly
+  separated in Notebook 1.
+- Feature engineering is cleanly abstracted in `construir_matriz()`, making
+  it easy to switch between model variants.
+- Normalization is applied consistently (training statistics reused for
+  inference), preventing data leakage.
+- README is thorough: detailed SageMaker deployment instructions, multiple
+  screenshots covering the full execution workflow, and a structured
+  local-vs-cloud comparison.
+- Conceptual explanations are written in accessible language and correctly
+  link mathematical quantities to astrophysical meaning.
+- Convergence discussion correctly identifies fast early descent followed by
+  slow refinement and links it to gradient magnitude.
+- Inference result (L≈2.54 for M=1.3, T=6600) is validated qualitatively
+  against bracketing training points — good scientific practice.
+
+------------------------------------------------------------
+ISSUES & MISSING ELEMENTS
+------------------------------------------------------------
+- [Bug, Notebook 1] MSE formula precedence error:
+    `mse = (1/2*n) * np.sum(error ** 2)`
+  evaluates as `(n/2) * sum(error^2)` in Python.
+  Correct code: `mse = (1/(2*n)) * np.sum(error ** 2)`
+  Gradient functions are not affected (they do not call error_mse internally),
+  so gradient descent converges correctly, but all printed/plotted cost values
+  are wrong by a factor of n^2.
+
+- [Bug, Notebook 1] Non-vectorized section uses `M_list` (lowercase 'l') in
+  the loop inside `predict_noVec` but the parameter is named `M_List`
+  (capital 'L'). This would raise a NameError at runtime.
+
+- [Compliance] `pandas` is pip-installed in both notebooks and imported in
+  Notebook 2. Pandas is not in the allowed library list. Although it is not
+  used in any regression computations, its presence violates the stated
+  constraint. The pip install cell should be limited to numpy and matplotlib.
+
+- [Minor, Notebook 1] The convergence plot starts at iteration index 10
+  (`history[10:]`) to skip the initial steep drop, but this detail is not
+  explained. A brief comment would improve clarity.
+
+- [Minor, Notebook 2] Convergence plots for M1/M2/M3 are generated inside the
+  training loop rather than as a comparative multi-curve figure. A side-by-side
+  or overlaid convergence comparison would make the M1/M2/M3 differences more
+  visually immediate.
+
+------------------------------------------------------------
+TA FEEDBACK TO STUDENT
+------------------------------------------------------------
+Overall, this is a well-executed submission that clearly demonstrates mastery
+of the core concepts: gradient descent, feature engineering, convergence
+analysis, and cloud deployment. The structure is clean and the mandatory
+components are all present and well-explained.
+
+The main issue to address is the MSE implementation bug in Notebook 1. Always
+verify formula implementations against hand-computed examples: for n=10 data
+points and residuals of ~1, the MSE should be in the range of ~0.05–1.0, not
+~50–100. A quick sanity check would have caught this. The fix is a single
+parenthesis: change `(1/2*n)` to `(1/(2*n))`.
+
+The variable name mismatch (`M_list` vs `M_List`) in the non-vectorized
+section is a small but critical bug — Python is case-sensitive. It is good
+practice to test each function independently with a small example before
+embedding it in a longer pipeline.
+
+Regarding pandas: the assignment explicitly restricts libraries to Python,
+NumPy, and Matplotlib. Even if pandas is not used in computations, importing
+it signals non-compliance. Remove the pandas import and restrict pip installs
+to the two required libraries.
+
+The SageMaker evidence is excellent — detailed, well-documented, and supported
+by multiple screenshots. The local-vs-cloud comparison adds real value to the
+README.
+
+For future work, consider plotting the M1/M2/M3 convergence curves on the same
+axes so that the improvement from each additional feature term is immediately
+visible.
+
+------------------------------------------------------------
+AI-GENERATION ASSESSMENT  (NON-GRADING — INFORMATIONAL ONLY)
+------------------------------------------------------------
+
+A. Qualitative Assessment
+   Indicators suggesting AI assistance:
+   - Code structure is unusually clean and well-commented for a first draft
+     (docstrings on every helper function, consistent parameter naming).
+   - Markdown explanations follow a formulaic pattern: equation → prose
+     expansion → interpretation. The depth is uniform across sections.
+   - Explanatory paragraphs use generic academic phrasing (e.g., "it can be
+     observed that…", "this indicates that…") with little personalization.
+   - The README follows a very structured template-like format (badges,
+     emoji checkmarks, comparison tables) that is characteristic of
+     AI-generated documentation scaffolding.
+
+   Indicators of human involvement:
+   - Explanations are written in Spanish (mixed with English code), which
+     introduces natural variation in tone and phrasing not typical of
+     purely AI-generated text.
+   - The MSE precedence bug (`(1/2*n)` vs `(1/(2*n))`) and the variable
+     name typo (`M_list` vs `M_List`) are authentic human mistakes that AI
+     code generation would typically avoid.
+   - Some markdown comments express personal observations ("observo que",
+     "me parece que") indicating genuine student engagement.
+   - The learning-rate discussion shows nuanced, self-consistent reasoning
+     about the α=0.5 case that goes beyond generic explanation.
+
+B. Quantitative Estimate
+   Code:              ~55% AI-assisted
+   Explanations/MD:   ~50% AI-assisted
+   README:            ~65% AI-assisted
+
+C. Commentary
+   The project shows signs of a hybrid workflow: AI tools were likely used to
+   scaffold the notebook structure, generate boilerplate code, and draft
+   portions of the markdown explanations, while the student contributed
+   domain-specific commentary (in Spanish), introduced genuine coding
+   mistakes, and exercised judgment in the analysis sections. The presence
+   of real bugs is the strongest signal of meaningful human involvement.
+   This assessment is observational and does not imply misconduct.
+
+============================================================
+  END OF EVALUATION REPORT
+============================================================
